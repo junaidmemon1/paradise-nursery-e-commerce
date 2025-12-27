@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ShoppingCart, Heart, Sun, Droplets, Thermometer, Wind, Minus, Plus, Check } from 'lucide-react';
@@ -6,16 +7,26 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/products/ProductCard';
 import { useCart } from '@/context/CartContext';
 import { products } from '@/data/products';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const { addItem, openCart } = useCart();
   const { toast } = useToast();
-
   const product = products.find((p) => p.id === id);
+  const [imgSrc, setImgSrc] = useState(product?.image || PLACEHOLDER_IMAGE);
+  const [imgError, setImgError] = useState(false);
+
+  const handleImageError = () => {
+    if (!imgError) {
+      setImgError(true);
+      setImgSrc(PLACEHOLDER_IMAGE);
+    }
+  };
+
   const relatedProducts = products
     .filter((p) => p.category === product?.category && p.id !== id)
     .slice(0, 4);
@@ -74,9 +85,11 @@ const ProductDetail = () => {
               {/* Image */}
               <div className="relative overflow-hidden rounded-2xl bg-secondary">
                 <img
-                  src={product.image}
+                  src={imgSrc}
                   alt={product.name}
                   className="aspect-square w-full object-cover"
+                  onError={handleImageError}
+                  loading="lazy"
                 />
                 {product.bestseller && (
                   <span className="absolute left-4 top-4 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground">

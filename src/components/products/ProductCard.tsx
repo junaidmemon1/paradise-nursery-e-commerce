@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,14 +10,25 @@ interface ProductCardProps {
   product: Product;
 }
 
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80';
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem, openCart } = useCart();
+  const [imgSrc, setImgSrc] = useState(product.image);
+  const [imgError, setImgError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
     openCart();
+  };
+
+  const handleImageError = () => {
+    if (!imgError) {
+      setImgError(true);
+      setImgSrc(PLACEHOLDER_IMAGE);
+    }
   };
 
   return (
@@ -52,9 +64,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Image */}
       <div className="aspect-square overflow-hidden bg-secondary">
         <img
-          src={product.image}
+          src={imgSrc}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={handleImageError}
+          loading="lazy"
         />
       </div>
 
