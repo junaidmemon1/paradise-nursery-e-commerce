@@ -117,6 +117,11 @@ const Footer = () => {
               </Link>
             </div>
           </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              All Rights Reserved © Junaid Ahmed Memon
+            </p>
+          </div>
         </div>
       </div>
     </footer>

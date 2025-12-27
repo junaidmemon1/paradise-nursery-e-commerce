@@ -64,12 +64,16 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden items-center gap-2 lg:flex">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <User className="h-5 w-5" />
-            </Button>
+            <Link to="/products">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Search className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -129,6 +133,13 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                to="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
+              >
+                Profile
+              </Link>
             </div>
           </div>
         )}
