@@ -6,8 +6,11 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/products/ProductCard';
 import { useCart } from '@/context/CartContext';
-import { products } from '@/data/products';
+import { useProduct, useRelatedProducts, Product } from '@/hooks/useProducts';
+import { useWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80';
 
@@ -16,8 +19,11 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const { addItem, openCart } = useCart();
   const { toast } = useToast();
-  const product = products.find((p) => p.id === id);
-  const [imgSrc, setImgSrc] = useState(product?.image || PLACEHOLDER_IMAGE);
+  const { data: product, isLoading } = useProduct(id || '');
+  const { data: relatedProducts = [] } = useRelatedProducts(product?.category || '', product?.id || '');
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
 
   const handleImageError = () => {
@@ -27,9 +33,45 @@ const ProductDetail = () => {
     }
   };
 
-  const relatedProducts = products
-    .filter((p) => p.category === product?.category && p.id !== id)
-    .slice(0, 4);
+  // Helper to convert DB product to ProductCard format
+  const toProductCardFormat = (p: Product) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    originalPrice: p.original_price ?? undefined,
+    image: p.image_url,
+    category: p.category as 'indoor' | 'outdoor' | 'pots' | 'accessories',
+    description: p.description || '',
+    careInfo: {
+      light: p.light || 'N/A',
+      water: p.water || 'N/A',
+      humidity: 'N/A',
+      temperature: 'N/A',
+    },
+    inStock: p.stock > 0,
+    featured: p.featured ?? false,
+    bestseller: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="py-8 lg:py-12">
+          <div className="container-main">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+              <Skeleton className="aspect-square w-full rounded-2xl" />
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
@@ -45,8 +87,9 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
+    const cartProduct = toProductCardFormat(product);
     for (let i = 0; i < quantity; i++) {
-      addItem(product);
+      addItem(cartProduct);
     }
     toast({
       title: "Added to cart!",
@@ -55,18 +98,21 @@ const ProductDetail = () => {
     openCart();
   };
 
+  const isWishlisted = isInWishlist(product.id);
+  const displayImage = imgSrc || product.image_url || PLACEHOLDER_IMAGE;
+
   const careIcons = [
-    { icon: Sun, label: 'Light', value: product.careInfo.light },
-    { icon: Droplets, label: 'Water', value: product.careInfo.water },
-    { icon: Wind, label: 'Humidity', value: product.careInfo.humidity },
-    { icon: Thermometer, label: 'Temp', value: product.careInfo.temperature },
+    { icon: Sun, label: 'Light', value: product.light || 'Indirect' },
+    { icon: Droplets, label: 'Water', value: product.water || 'Weekly' },
+    { icon: Wind, label: 'Care Level', value: product.care_level || 'Easy' },
+    { icon: Thermometer, label: 'Stock', value: product.stock > 0 ? `${product.stock} available` : 'Out of stock' },
   ];
 
   return (
     <>
       <Helmet>
         <title>{product.name} | Paradise Nursery</title>
-        <meta name="description" content={product.description} />
+        <meta name="description" content={product.description || ''} />
       </Helmet>
       <Layout>
         <div className="py-8 lg:py-12">
@@ -85,15 +131,15 @@ const ProductDetail = () => {
               {/* Image */}
               <div className="relative overflow-hidden rounded-2xl bg-secondary">
                 <img
-                  src={imgSrc}
+                  src={displayImage}
                   alt={product.name}
                   className="aspect-square w-full object-cover"
                   onError={handleImageError}
                   loading="lazy"
                 />
-                {product.bestseller && (
+                {product.featured && (
                   <span className="absolute left-4 top-4 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground">
-                    Bestseller
+                    Featured
                   </span>
                 )}
               </div>
@@ -112,9 +158,9 @@ const ProductDetail = () => {
                   <span className="text-2xl font-bold text-foreground">
                     ${product.price.toFixed(2)}
                   </span>
-                  {product.originalPrice && (
+                  {product.original_price && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ${product.originalPrice.toFixed(2)}
+                      ${product.original_price.toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -141,7 +187,7 @@ const ProductDetail = () => {
                             <p className="text-xs font-medium text-muted-foreground">
                               {label}
                             </p>
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-sm font-medium text-foreground capitalize">
                               {value}
                             </p>
                           </div>
@@ -165,7 +211,8 @@ const ProductDetail = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setQuantity(quantity + 1)}
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      disabled={quantity >= product.stock}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -174,12 +221,18 @@ const ProductDetail = () => {
                     size="lg"
                     className="flex-1 gap-2"
                     onClick={handleAddToCart}
+                    disabled={product.stock <= 0}
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    Add to Cart
+                    {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                   </Button>
-                  <Button variant="outline" size="lg" className="px-4">
-                    <Heart className="h-5 w-5" />
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={cn("px-4", isWishlisted && "bg-accent text-accent-foreground")}
+                    onClick={() => toggleWishlist(product.id)}
+                  >
+                    <Heart className={cn("h-5 w-5", isWishlisted && "fill-current")} />
                   </Button>
                 </div>
 
@@ -206,8 +259,8 @@ const ProductDetail = () => {
                   You Might Also Like
                 </h2>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {relatedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                  {relatedProducts.map((p) => (
+                    <ProductCard key={p.id} product={toProductCardFormat(p)} />
                   ))}
                 </div>
               </div>

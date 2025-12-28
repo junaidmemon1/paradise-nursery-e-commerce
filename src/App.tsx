@@ -17,11 +17,16 @@ import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./pages/admin/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import AdminProducts from "./pages/admin/Products";
+import AdminOrders from "./pages/admin/Orders";
+import AdminMessages from "./pages/admin/Messages";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -46,21 +51,20 @@ const AppRoutes = () => (
     <Route path="/products" element={<Products />} />
     <Route path="/products/:id" element={<ProductDetail />} />
     <Route path="/cart" element={<Cart />} />
-    <Route path="/checkout" element={
-      <ProtectedRoute>
-        <Checkout />
-      </ProtectedRoute>
-    } />
-    <Route path="/profile" element={
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
-    } />
+    <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+    <Route path="/wishlist" element={<Wishlist />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/faq" element={<FAQ />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/privacy" element={<Privacy />} />
     <Route path="/terms" element={<Terms />} />
+    <Route path="/admin" element={<AdminLayout />}>
+      <Route index element={<Dashboard />} />
+      <Route path="products" element={<AdminProducts />} />
+      <Route path="orders" element={<AdminOrders />} />
+      <Route path="messages" element={<AdminMessages />} />
+    </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

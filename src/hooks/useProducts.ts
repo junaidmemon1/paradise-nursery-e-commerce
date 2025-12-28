@@ -77,3 +77,21 @@ export const useFeaturedProducts = () => {
     },
   });
 };
+
+export const useRelatedProducts = (category: string, excludeId: string) => {
+  return useQuery({
+    queryKey: ['products', 'related', category, excludeId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category', category)
+        .neq('id', excludeId)
+        .limit(4);
+      
+      if (error) throw error;
+      return data as Product[];
+    },
+    enabled: !!category && !!excludeId,
+  });
+};

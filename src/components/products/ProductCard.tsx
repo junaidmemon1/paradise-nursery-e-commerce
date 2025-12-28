@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/hooks/useWishlist';
 import { Product } from '@/data/products';
 import { cn } from '@/lib/utils';
 
@@ -14,14 +15,23 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1459411552884-841db
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem, openCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [imgSrc, setImgSrc] = useState(product.image);
   const [imgError, setImgError] = useState(false);
+
+  const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
     openCart();
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
   };
 
   const handleImageError = () => {
@@ -52,13 +62,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Wishlist Button */}
       <button
-        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-muted-foreground backdrop-blur-sm transition-all hover:bg-background hover:text-accent"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+        className={cn(
+          "absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-all",
+          isWishlisted
+            ? "bg-accent text-accent-foreground"
+            : "bg-background/80 text-muted-foreground hover:bg-background hover:text-accent"
+        )}
+        onClick={handleWishlistClick}
       >
-        <Heart className="h-4 w-4" />
+        <Heart className={cn("h-4 w-4", isWishlisted && "fill-current")} />
       </button>
 
       {/* Image */}
@@ -99,9 +111,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
             "translate-y-2 group-hover:translate-y-0"
           )}
           size="sm"
+          disabled={!product.inStock}
         >
           <ShoppingCart className="h-4 w-4" />
-          Add to Cart
+          {product.inStock ? 'Add to Cart' : 'Out of Stock'}
         </Button>
       </div>
     </Link>
