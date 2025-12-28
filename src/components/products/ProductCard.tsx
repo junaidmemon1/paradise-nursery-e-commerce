@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -18,6 +18,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [imgSrc, setImgSrc] = useState(product.image);
   const [imgError, setImgError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const isWishlisted = isInWishlist(product.id);
 
@@ -41,59 +42,80 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
+  const discountPercent = product.originalPrice 
+    ? Math.round((1 - product.price / product.originalPrice) * 100) 
+    : 0;
+
   return (
     <Link
       to={`/products/${product.id}`}
-      className="group relative block overflow-hidden rounded-2xl bg-card transition-all duration-300 hover:shadow-hover"
+      className="group relative block overflow-hidden rounded-3xl bg-card transition-all duration-500 hover:shadow-3d"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Badges */}
-      <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
+      <div className="absolute left-4 top-4 z-10 flex flex-col gap-2">
         {product.bestseller && (
-          <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
+          <span className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-lg animate-scale-in">
             Bestseller
           </span>
         )}
-        {product.originalPrice && (
-          <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-            Sale
+        {discountPercent > 0 && (
+          <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground shadow-lg animate-scale-in">
+            -{discountPercent}%
           </span>
         )}
       </div>
 
-      {/* Wishlist Button */}
-      <button
-        className={cn(
-          "absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-all",
-          isWishlisted
-            ? "bg-accent text-accent-foreground"
-            : "bg-background/80 text-muted-foreground hover:bg-background hover:text-accent"
-        )}
-        onClick={handleWishlistClick}
-      >
-        <Heart className={cn("h-4 w-4", isWishlisted && "fill-current")} />
-      </button>
+      {/* Action Buttons */}
+      <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
+        <button
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-300",
+            isWishlisted
+              ? "bg-accent text-accent-foreground scale-110"
+              : "bg-background/90 text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:scale-110"
+          )}
+          onClick={handleWishlistClick}
+        >
+          <Heart className={cn("h-4 w-4 transition-transform", isWishlisted && "fill-current scale-110")} />
+        </button>
+        <button
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-full bg-background/90 text-muted-foreground shadow-lg transition-all duration-300 hover:bg-primary hover:text-primary-foreground",
+            isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
+          )}
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+      </div>
 
       {/* Image */}
       <div className="aspect-square overflow-hidden bg-secondary">
         <img
           src={imgSrc}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="h-full w-full object-cover transition-all duration-700 group-hover:scale-110"
           onError={handleImageError}
           loading="lazy"
         />
+        {/* Overlay gradient on hover */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent transition-opacity duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )} />
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <div className="p-5">
+        <span className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {product.category}
         </span>
-        <h3 className="mt-1 font-display text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+        <h3 className="mt-3 font-display text-lg font-semibold text-foreground transition-colors group-hover:text-primary line-clamp-1">
           {product.name}
         </h3>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-lg font-bold text-foreground">
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-xl font-bold text-foreground">
             ${product.price.toFixed(2)}
           </span>
           {product.originalPrice && (
@@ -107,10 +129,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <Button
           onClick={handleAddToCart}
           className={cn(
-            "mt-3 w-full gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100",
-            "translate-y-2 group-hover:translate-y-0"
+            "mt-4 w-full gap-2 rounded-xl transition-all duration-300",
+            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
           )}
-          size="sm"
           disabled={!product.inStock}
         >
           <ShoppingCart className="h-4 w-4" />

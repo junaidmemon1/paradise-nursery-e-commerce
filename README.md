@@ -1,73 +1,165 @@
-# Welcome to your Lovable project
+# 🌿 Paradise Nursery - E-Commerce Plant Shop
 
-## Project info
+A beautiful, full-stack e-commerce application for selling plants and gardening accessories. Built with modern technologies and featuring a stunning, responsive design.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![Paradise Nursery](https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=1200&q=80)
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+### Customer Features
+- **🛒 Shopping Cart** - Add/remove items, adjust quantities, persistent cart state
+- **❤️ Wishlist** - Save favorite products (requires authentication)
+- **🔍 Product Search & Filters** - Search by name, filter by category, sort by price/name
+- **📱 Responsive Design** - Beautiful on all devices (mobile, tablet, desktop)
+- **🎨 Premium UI/UX** - Glassmorphism effects, smooth animations, micro-interactions
+- **👤 User Authentication** - Sign up, login, profile management
+- **📦 Order Management** - Place orders, view order history
+- **📧 Newsletter Subscription** - Stay updated with latest offers
 
-**Use Lovable**
+### Admin Features
+- **📊 Dashboard** - Overview of orders, products, messages
+- **🌱 Product Management** - Add, edit, delete products
+- **📋 Order Management** - View and update order status
+- **💬 Message Center** - View and respond to customer inquiries
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Technical Features
+- **🔐 Row Level Security** - Secure data access with Supabase RLS
+- **⚡ Real-time Updates** - Instant data synchronization
+- **🎭 Dark/Light Mode** - Theme support
+- **🚀 Optimized Performance** - Lazy loading, code splitting
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router v6
+- **Forms**: React Hook Form, Zod validation
+- **Icons**: Lucide React
+- **Animations**: CSS animations, Tailwind animations
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📁 Project Structure
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/
+│   ├── cart/          # Cart drawer component
+│   ├── home/          # Homepage sections (Hero, Categories, etc.)
+│   ├── layout/        # Navbar, Footer, Layout wrapper
+│   ├── products/      # Product card, product list
+│   └── ui/            # shadcn/ui components
+├── context/           # React contexts (Auth, Cart)
+├── data/              # Static data (categories)
+├── hooks/             # Custom hooks (useProducts, useWishlist, etc.)
+├── integrations/      # Supabase client and types
+├── lib/               # Utility functions
+├── pages/             # Route pages
+│   ├── admin/         # Admin panel pages
+│   └── ...            # Customer-facing pages
+└── types/             # TypeScript type definitions
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Getting Started
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Prerequisites
 
-**Use GitHub Codespaces**
+- Node.js 18+ installed
+- npm or bun package manager
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Installation
 
-## What technologies are used for this project?
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd paradise-nursery
+   ```
 
-This project is built with:
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+3. **Start the development server**
+   ```bash
+   npm run dev
+   # or
+   bun run dev
+   ```
 
-## How can I deploy this project?
+4. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Environment Variables
 
-## Can I connect a custom domain to my Lovable project?
+The project uses Lovable Cloud (Supabase) for the backend. Environment variables are automatically configured when using Lovable. If running locally with your own Supabase instance:
 
-Yes, you can!
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📝 Available Scripts
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+## 🗄️ Database Schema
+
+### Tables
+
+- **products** - Plant and accessory catalog
+- **profiles** - User profile information
+- **orders** - Customer orders
+- **order_items** - Items within each order
+- **wishlist** - User's saved products
+- **contact_messages** - Customer inquiries
+- **user_roles** - Admin/user role management
+
+## 🔐 Authentication
+
+The app uses Supabase Auth with:
+- Email/Password authentication
+- Auto-confirm email signups (for development)
+- Protected routes for authenticated users
+- Admin-only routes for product/order management
+
+## 🎨 Design System
+
+The project uses a custom design system with:
+- **Colors**: Forest green, cream, terracotta, sage
+- **Typography**: Playfair Display (headings), DM Sans (body)
+- **Animations**: Float, fade, scale, slide effects
+- **Components**: Glassmorphism cards, premium shadows
+
+## 📦 Deployment
+
+The app is designed to be deployed on Lovable. Simply click "Publish" in the Lovable editor to deploy.
+
+For manual deployment:
+1. Build the project: `npm run build`
+2. Deploy the `dist` folder to your hosting provider
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📄 License
+
+This project is created with Lovable. All rights reserved.
+
+---
+
+**Made with 💚 by Paradise Nursery Team**
+
+© 2024 Junaid Ahmed Memon. All Rights Reserved.
