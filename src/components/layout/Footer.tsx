@@ -67,16 +67,26 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-display text-base font-semibold text-foreground">Help</h3>
             <ul className="space-y-2">
-              {['Plant Care Guide', 'Shipping Info', 'Returns', 'FAQs', 'Contact Us'].map((item) => (
-                <li key={item}>
-                  <Link 
-                    to="/" 
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link to="/faq" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  FAQs
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -109,10 +119,10 @@ const Footer = () => {
               © 2024 Paradise Nursery. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Privacy Policy
               </Link>
-              <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/terms" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Terms of Service
               </Link>
             </div>
