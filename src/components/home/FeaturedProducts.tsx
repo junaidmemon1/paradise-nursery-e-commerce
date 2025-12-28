@@ -2,10 +2,31 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/products/ProductCard';
-import { products } from '@/data/products';
+import { useFeaturedProducts, Product } from '@/hooks/useProducts';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const FeaturedProducts = () => {
-  const featuredProducts = products.filter((p) => p.featured).slice(0, 4);
+  const { data: products = [], isLoading } = useFeaturedProducts();
+
+  // Helper to convert DB product to ProductCard format
+  const toProductCardFormat = (product: Product) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    originalPrice: product.original_price ?? undefined,
+    image: product.image_url,
+    category: product.category as 'indoor' | 'outdoor' | 'pots' | 'accessories',
+    description: product.description || '',
+    careInfo: {
+      light: product.light || 'N/A',
+      water: product.water || 'N/A',
+      humidity: 'N/A',
+      temperature: 'N/A',
+    },
+    inStock: product.stock > 0,
+    featured: product.featured ?? false,
+    bestseller: false,
+  });
 
   return (
     <section className="bg-secondary/30 py-16 lg:py-24">
@@ -27,17 +48,29 @@ const FeaturedProducts = () => {
           </Button>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredProducts.map((product, index) => (
-            <div
-              key={product.id}
-              className="animate-fade-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl bg-card p-4">
+                <Skeleton className="aspect-square w-full rounded-xl" />
+                <Skeleton className="mt-4 h-4 w-3/4" />
+                <Skeleton className="mt-2 h-6 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.slice(0, 4).map((product, index) => (
+              <div
+                key={product.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <ProductCard product={toProductCardFormat(product)} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

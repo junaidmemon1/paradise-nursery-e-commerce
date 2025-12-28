@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Leaf, Search, User } from 'lucide-react';
+import { ShoppingCart, Menu, X, Leaf, Search, User, LogOut, Heart, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { totalItems, toggleCart } = useCart();
+  const { user, isAdmin, signOut } = useAuth();
   const location = useLocation();
 
   const navLinks = [
@@ -69,11 +78,61 @@ const Navbar = () => {
                 <Search className="h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/profile">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
+            
+            {user && (
+              <Link to="/wishlist">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Heart className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wishlist" className="flex items-center gap-2">
+                      <Heart className="h-4 w-4" />
+                      Wishlist
+                    </Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+            
             <Button 
               variant="ghost" 
               size="icon" 
@@ -133,13 +192,51 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/profile"
-                onClick={() => setIsMenuOpen(false)}
-                className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
-              >
-                Profile
-              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
+                  >
+                    Wishlist
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setIsMenuOpen(false);
+                    }}
+                    className="px-4 py-3 text-left text-base font-medium text-destructive transition-colors rounded-lg hover:bg-secondary/50"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-3 text-base font-medium text-muted-foreground transition-colors rounded-lg hover:text-foreground hover:bg-secondary/50"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         )}

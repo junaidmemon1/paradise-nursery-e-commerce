@@ -6,8 +6,10 @@ import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { products, categories } from '@/data/products';
+import { useProducts, Product } from '@/hooks/useProducts';
+import { categories } from '@/types/product';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name';
 
@@ -18,14 +20,10 @@ const Products = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const selectedCategory = searchParams.get('category') || 'all';
+  const { data: products = [], isLoading } = useProducts(selectedCategory);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      result = result.filter((p) => p.category === selectedCategory);
-    }
 
     // Filter by search
     if (searchQuery) {
@@ -33,7 +31,7 @@ const Products = () => {
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query)
+          (p.description?.toLowerCase().includes(query) ?? false)
       );
     }
 
@@ -58,7 +56,7 @@ const Products = () => {
     }
 
     return result;
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [products, searchQuery, sortBy]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'all') {
@@ -68,6 +66,26 @@ const Products = () => {
     }
     setSearchParams(searchParams);
   };
+
+  // Helper to convert DB product to ProductCard format
+  const toProductCardFormat = (product: Product) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    originalPrice: product.original_price ?? undefined,
+    image: product.image_url,
+    category: product.category as 'indoor' | 'outdoor' | 'pots' | 'accessories',
+    description: product.description || '',
+    careInfo: {
+      light: product.light || 'N/A',
+      water: product.water || 'N/A',
+      humidity: 'N/A',
+      temperature: 'N/A',
+    },
+    inStock: product.stock > 0,
+    featured: product.featured ?? false,
+    bestseller: false,
+  });
 
   return (
     <>
@@ -187,7 +205,17 @@ const Products = () => {
 
               {/* Products Grid */}
               <div className="flex-1">
-                {filteredProducts.length > 0 ? (
+                {isLoading ? (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="rounded-2xl bg-card p-4">
+                        <Skeleton className="aspect-square w-full rounded-xl" />
+                        <Skeleton className="mt-4 h-4 w-3/4" />
+                        <Skeleton className="mt-2 h-6 w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredProducts.length > 0 ? (
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredProducts.map((product, index) => (
                       <div
@@ -195,7 +223,7 @@ const Products = () => {
                         className="animate-fade-up"
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
-                        <ProductCard product={product} />
+                        <ProductCard product={toProductCardFormat(product)} />
                       </div>
                     ))}
                   </div>
